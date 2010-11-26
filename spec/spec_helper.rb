@@ -1,12 +1,18 @@
 $TESTING=true
 
+require 'simplecov'
+SimpleCov.start do
+  add_group 'Libraries', 'lib'
+  add_group 'Specs', 'spec'
+end
+
 $:.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 require 'thor'
 require 'thor/group'
 require 'stringio'
 
-require 'rubygems'
 require 'rdoc'
+require 'rspec'
 require 'diff/lcs' # You need diff/lcs installed to run specs (but not to run Thor).
 require 'fakeweb'  # You need fakeweb installed to run specs (but not to run Thor).
 
@@ -22,21 +28,14 @@ load File.join(File.dirname(__FILE__), "fixtures", "group.thor")
 load File.join(File.dirname(__FILE__), "fixtures", "script.thor")
 load File.join(File.dirname(__FILE__), "fixtures", "invoke.thor")
 
-Kernel.module_eval do
-  alias_method :must, :should
-  alias_method :must_not, :should_not
-  undef_method :should
-  undef_method :should_not
-end
-
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   def capture(stream)
     begin
       stream = stream.to_s
       eval "$#{stream} = StringIO.new"
       yield
       result = eval("$#{stream}").string
-    ensure 
+    ensure
       eval("$#{stream} = #{stream.upcase}")
     end
 
